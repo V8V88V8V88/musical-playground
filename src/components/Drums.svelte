@@ -12,14 +12,15 @@
       { name: 'Crash', key: 'G', sound: 'C3', color: 'purple' },
     ];
   
-    onMount(() => {
+    onMount(async () => {
+      await Tone.start();
       sampler = new Tone.Sampler({
         urls: {
-          C2: "https://tonejs.github.io/audio/drum-samples/kicks/kick.wav",
-          D2: "https://tonejs.github.io/audio/drum-samples/snare/snare.wav",
-          "F#2": "https://tonejs.github.io/audio/drum-samples/hh/hh.wav",
-          A2: "https://tonejs.github.io/audio/drum-samples/tom/tom.wav",
-          C3: "https://tonejs.github.io/audio/drum-samples/crash/crash.wav",
+          C2: "https://tonejs.github.io/audio/drum-samples/kick.mp3",
+          D2: "https://tonejs.github.io/audio/drum-samples/snare.mp3",
+          "F#2": "https://tonejs.github.io/audio/drum-samples/hihat.mp3",
+          A2: "https://tonejs.github.io/audio/drum-samples/tom.mp3",
+          C3: "https://tonejs.github.io/audio/drum-samples/crash.mp3",
         },
         onload: () => {
           console.log("Sampler loaded!");
@@ -36,13 +37,15 @@
     });
   
     function playDrum(sound, key) {
-      sampler.triggerAttackRelease(sound, '8n');
-      activeKeys.add(key);
-      activeKeys = activeKeys;
-      setTimeout(() => {
-        activeKeys.delete(key);
+      if (sampler && sampler.loaded) {
+        sampler.triggerAttackRelease(sound, '8n');
+        activeKeys.add(key);
         activeKeys = activeKeys;
-      }, 100);
+        setTimeout(() => {
+          activeKeys.delete(key);
+          activeKeys = activeKeys;
+        }, 100);
+      }
     }
   
     function handleKeyDown(event) {
