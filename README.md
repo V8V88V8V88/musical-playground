@@ -1,38 +1,59 @@
-# sv
+# Musical Playground 🎶
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+**Musical Playground** is an interactive web app built with **Svelte**, **Tone.js**, and **Vite**. It lets users play virtual instruments like Piano, Guitar, and Drums using mouse clicks or keyboard inputs. Perfect for creating simple melodies and experimenting with sounds! 
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- 🎹 **Piano**: Play notes using your keyboard or click on the virtual keys.
+- 🎸 **Guitar**: Strum strings with a click or keypress for chord-like sounds.
+- 🥁 **Drums**: Tap into beats with responsive drum sounds.
+- 🔊 Built with **Tone.js** for high-quality audio synthesis.
+- 🖱️ Keyboard and mouse interaction support for accessibility.
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Tech Stack
 
-# create a new project in my-app
-npx sv create my-app
-```
+- **Svelte**: Frontend framework for smooth UI interactions.
+- **Tone.js**: Audio library for sound synthesis and manipulation.
+- **Vite**: Fast development server and build tool.
 
-## Developing
+## Installation
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/v8v88v8v88/musical-playground.git
+   cd musical-playground
+   ```
 
-```bash
-npm run dev
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Building
+4. Open your browser at [http://localhost:5173](http://localhost:5173).
 
-To create a production version of your app:
+## How to Use
 
-```bash
-npm run build
-```
+1. Select an instrument from the menu (Piano, Guitar, or Drums).
+2. Use your keyboard or click on the on-screen instrument to play sounds.
+3. Enjoy creating music!
 
-You can preview the production build with `npm run preview`.
+## Accessibility
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+This app is designed with accessibility in mind:
+- Keyboard controls for playing instruments.
+- Proper ARIA roles and labels for better screen reader support.
+
+## Contributing
+
+Feel free to contribute! Submit a pull request or open an issue for any bugs or improvements.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). 
+
+Enjoy the music! 🎵
