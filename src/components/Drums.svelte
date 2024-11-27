@@ -2,30 +2,32 @@
     import { onMount } from 'svelte';
     import * as Tone from 'tone';
   
-    let sampler;
+    let audioBuffers = {};
     let activeKeys = new Set();
     let drums = [
-      { name: 'Kick', key: 'A', sound: 'C2', color: 'amber' },
-      { name: 'Snare', key: 'S', sound: 'D2', color: 'yellow' },
-      { name: 'Hi-Hat', key: 'D', sound: 'F#2', color: 'orange' },
-      { name: 'Tom', key: 'F', sound: 'A2', color: 'red' },
-      { name: 'Crash', key: 'G', sound: 'C3', color: 'purple' },
+      { name: 'Kick', key: 'A', sound: 'kick', color: 'amber' },
+      { name: 'Snare', key: 'S', sound: 'snare', color: 'yellow' },
+      { name: 'Hi-Hat', key: 'D', sound: 'hihat', color: 'orange' },
+      { name: 'Tom', key: 'F', sound: 'tom', color: 'red' },
+      { name: 'Crash', key: 'G', sound: 'crash', color: 'purple' },
     ];
   
     onMount(async () => {
       await Tone.start();
-      sampler = new Tone.Sampler({
-        urls: {
-          C2: "https://tonejs.github.io/audio/drum-samples/kick.mp3",
-          D2: "https://tonejs.github.io/audio/drum-samples/snare.mp3",
-          "F#2": "https://tonejs.github.io/audio/drum-samples/hihat.mp3",
-          A2: "https://tonejs.github.io/audio/drum-samples/tom.mp3",
-          C3: "https://tonejs.github.io/audio/drum-samples/crash.mp3",
-        },
-        onload: () => {
-          console.log("Sampler loaded!");
-        },
-      }).toDestination();
+      
+      const soundUrls = {
+        kick: "https://tonejs.github.io/audio/drum-samples/kick.mp3",
+        snare: "https://tonejs.github.io/audio/drum-samples/snare.mp3",
+        hihat: "https://tonejs.github.io/audio/drum-samples/hihat.mp3",
+        tom: "https://tonejs.github.io/audio/drum-samples/tom.mp3",
+        crash: "https://tonejs.github.io/audio/drum-samples/crash.mp3",
+      };
+  
+      for (const [name, url] of Object.entries(soundUrls)) {
+        audioBuffers[name] = new Tone.Buffer(url, () => {
+          console.log(`${name} loaded`);
+        });
+      }
   
       window.addEventListener('keydown', handleKeyDown);
       window.addEventListener('keyup', handleKeyUp);
@@ -37,14 +39,17 @@
     });
   
     function playDrum(sound, key) {
-      if (sampler && sampler.loaded) {
-        sampler.triggerAttackRelease(sound, '8n');
+      if (audioBuffers[sound] && audioBuffers[sound].loaded) {
+        const player = new Tone.Player(audioBuffers[sound]).toDestination();
+        player.start();
         activeKeys.add(key);
         activeKeys = activeKeys;
         setTimeout(() => {
           activeKeys.delete(key);
           activeKeys = activeKeys;
         }, 100);
+      } else {
+        console.log(`Sound ${sound} not loaded yet`);
       }
     }
   
