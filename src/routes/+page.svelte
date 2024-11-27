@@ -1,14 +1,16 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, fade, fly } from 'svelte/transition';
     import * as Tone from 'tone';
     import Piano from '../components/Piano.svelte';
     import Drums from '../components/Drums.svelte';
     import Guitar from '../components/Guitar.svelte';
   
     let currentInstrument = 'piano';
+    let isLoaded = false;
   
     onMount(() => {
       Tone.start();
+      isLoaded = true;
     });
   
     function changeInstrument(instrument) {
@@ -16,49 +18,67 @@
     }
   </script>
   
-  <main class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 p-8">
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-4xl font-bold text-white mb-8 text-center">Musical Playground</h1>
-      
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div class="flex justify-center space-x-4 mb-6">
-          <button
-            class="px-4 py-2 rounded-full transition-colors duration-200 {currentInstrument === 'piano' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-indigo-100'}"
-            on:click={() => changeInstrument('piano')}
-          >
-            Piano
-          </button>
-          <button
-            class="px-4 py-2 rounded-full transition-colors duration-200 {currentInstrument === 'drums' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-indigo-100'}"
-            on:click={() => changeInstrument('drums')}
-          >
-            Drums
-          </button>
-          <button
-            class="px-4 py-2 rounded-full transition-colors duration-200 {currentInstrument === 'guitar' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-indigo-100'}"
-            on:click={() => changeInstrument('guitar')}
-          >
-            Guitar
-          </button>
+  <main class="min-h-screen bg-gradient-to-br from-yellow-300 via-yellow-200 to-amber-100">
+    <div class="max-w-5xl mx-auto px-4 py-12">
+      {#if isLoaded}
+        <div in:fade={{ duration: 1000 }}>
+          <h1 class="text-6xl font-bold text-amber-900 mb-2 text-center tracking-tight">
+            Musical Playground
+          </h1>
+          <p class="text-amber-800 text-center mb-12 text-lg">
+            Create beautiful melodies with virtual instruments
+          </p>
+          
+          <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 mb-8">
+            <div class="flex justify-center space-x-4 mb-12">
+              {#each ['piano', 'drums', 'guitar'] as instrument}
+                <button
+                  class="px-6 py-3 rounded-full text-lg font-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 {
+                    currentInstrument === instrument
+                      ? 'bg-amber-500 text-white shadow-lg'
+                      : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+                  }"
+                  on:click={() => changeInstrument(instrument)}
+                >
+                  {instrument.charAt(0).toUpperCase() + instrument.slice(1)}
+                </button>
+              {/each}
+            </div>
+            
+            <div class="transition-all duration-500">
+              {#if currentInstrument === 'piano'}
+                <div in:fly={{ y: 20, duration: 500 }}>
+                  <Piano />
+                </div>
+              {:else if currentInstrument === 'drums'}
+                <div in:fly={{ y: 20, duration: 500 }}>
+                  <Drums />
+                </div>
+              {:else if currentInstrument === 'guitar'}
+                <div in:fly={{ y: 20, duration: 500 }}>
+                  <Guitar />
+                </div>
+              {/if}
+            </div>
+          </div>
+          
+          <div class="text-center">
+            <p class="text-amber-800 text-lg font-medium mb-4">
+              Use your mouse to click on the instruments or your keyboard to play!
+            </p>
+            <div class="inline-flex items-center space-x-2 bg-amber-100 px-4 py-2 rounded-full text-amber-900">
+              <span class="text-amber-600">Tip:</span>
+              <span>Press the highlighted keys on your keyboard to play notes</span>
+            </div>
+          </div>
         </div>
-        
-        {#if currentInstrument === 'piano'}
-          <Piano />
-        {:else if currentInstrument === 'drums'}
-          <Drums />
-        {:else if currentInstrument === 'guitar'}
-          <Guitar />
-        {/if}
-      </div>
-      
-      <p class="text-center text-white">
-        Use your mouse to click on the instruments or your keyboard to play!
-      </p>
+      {/if}
     </div>
   </main>
   
-  <style lang="postcss">
+  <style>
     :global(body) {
-      @apply bg-gray-100;
+      overflow-x: hidden;
     }
   </style>
+  
