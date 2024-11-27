@@ -1,5 +1,6 @@
 <script>
-    import { onMount, fade, fly } from 'svelte/transition';
+    import { onMount } from 'svelte';
+    import { fade, fly } from 'svelte/transition';
     import * as Tone from 'tone';
     import Piano from '../components/Piano.svelte';
     import Drums from '../components/Drums.svelte';
@@ -81,4 +82,5 @@
       overflow-x: hidden;
     }
   </style>
+  
   
