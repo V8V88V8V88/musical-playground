@@ -62,8 +62,8 @@
   <div class="w-full max-w-2xl">
     {#each strings as { note, key, color }}
       <button
-        class={`relative w-full h-16 bg-gradient-to-r from-amber-800 to-amber-700 rounded-lg mb-4 overflow-hidden transition-transform duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-${color}
-          ${activeStrings.has(key) ? 'scale-101' : ''}`}
+        class={`relative w-full h-16 bg-gradient-to-r from-amber-800 to-amber-700 rounded-lg mb-4 overflow-hidden transition-transform duration-200 transform hover:scale-105 focus:outline-none`}
+        class:scale-105={activeStrings.has(key)}
         on:click={() => playString(note, key)}
       >
         <div class="absolute inset-0 flex items-center justify-between px-6">
@@ -77,9 +77,9 @@
           <div class="w-4 h-4 rounded-full bg-amber-400/80 shadow-lg"></div>
         </div>
         <div
-          class={`absolute inset-0 bg-${color}/20 transform origin-left transition-transform duration-300 ${
-            activeStrings.has(key) ? 'scale-x-100' : 'scale-x-0'
-          }`}
+          class="absolute inset-0 transform origin-left transition-transform duration-300"
+          style="background-color: rgba(var(--tw-color-${color.replace('amber-', '')}), 0.2);"
+          class:scale-x-100={activeStrings.has(key)}
         ></div>
       </button>
     {/each}
