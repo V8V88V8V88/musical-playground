@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import * as Tone from 'tone';
 
-  let audioBuffers = {};
   let activeKeys = new Set();
   let audioContextStarted = false;
 
@@ -14,25 +13,38 @@
     { name: 'Crash', key: 'G', sound: 'crash', color: 'purple' },
   ];
 
-  onMount(async () => {
-    console.log("Initializing drum machine...");
+  let synths = {};
 
-    // Define sound URLs
-    const soundUrls = {
-      kick: "https://tonejs.github.io/audio/drum-samples/kick.mp3",
-      snare: "https://tonejs.github.io/audio/drum-samples/snare.mp3",
-      hihat: "https://tonejs.github.io/audio/drum-samples/hihat.mp3",
-      tom: "https://tonejs.github.io/audio/drum-samples/tom.mp3",
-      crash: "https://tonejs.github.io/audio/drum-samples/crash.mp3",
-    };
+  onMount(() => {
+    console.log("Initializing drum machine synths...");
 
-    // Load buffers
-    for (const [name, url] of Object.entries(soundUrls)) {
-      audioBuffers[name] = await new Promise((resolve, reject) => {
-        const buffer = new Tone.Buffer(url, () => resolve(buffer), reject);
-      });
-      console.log(`${name} loaded`);
-    }
+    synths.kick = new Tone.MembraneSynth().toDestination();
+    synths.snare = new Tone.NoiseSynth({
+      noise: { type: "white" },
+      envelope: { attack: 0.005, decay: 0.2, sustain: 0, release: 0.2 }
+    }).toDestination();
+    synths.hihat = new Tone.MetalSynth({
+      frequency: 200,
+      envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+      harmonicity: 5.1,
+      modulationIndex: 32,
+      resonance: 4000,
+      octaves: 1.5
+    }).toDestination();
+    synths.tom = new Tone.MembraneSynth({
+      pitchDecay: 0.05,
+      octaves: 4,
+      oscillator: { type: "sine" },
+      envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
+    }).toDestination();
+    synths.crash = new Tone.MetalSynth({
+      frequency: 300,
+      envelope: { attack: 0.001, decay: 1.5, release: 0.2 },
+      harmonicity: 5.1,
+      modulationIndex: 32,
+      resonance: 4000,
+      octaves: 1.5
+    }).toDestination();
 
     // Attach event listeners
     window.addEventListener('keydown', handleKeyDown);
@@ -41,6 +53,11 @@
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      
+      // dispose synths
+      Object.values(synths).forEach(synth => {
+        if (synth && synth.dispose) synth.dispose();
+      });
     };
   });
 
@@ -54,9 +71,13 @@
 
   function playDrum(sound, key) {
     console.log(`Attempting to play: ${sound}`);
-    if (audioBuffers[sound]) {
-      const player = new Tone.Player(audioBuffers[sound]).toDestination();
-      player.start();
+    if (synths[sound]) {
+      if (sound === 'kick') synths[sound].triggerAttackRelease("C1", "8n");
+      else if (sound === 'snare') synths[sound].triggerAttackRelease("8n");
+      else if (sound === 'hihat') synths[sound].triggerAttackRelease("32n");
+      else if (sound === 'tom') synths[sound].triggerAttackRelease("G2", "4n");
+      else if (sound === 'crash') synths[sound].triggerAttackRelease("2n");
+      
       activeKeys.add(key);
       activeKeys = new Set(activeKeys); // Trigger reactivity
       setTimeout(() => {
@@ -64,7 +85,7 @@
         activeKeys = new Set(activeKeys); // Trigger reactivity
       }, 100);
     } else {
-      console.error(`Sound ${sound} not loaded`);
+      console.error(`Synth for ${sound} not loaded`);
     }
   }
 

@@ -1,9 +1,11 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import * as Tone from 'tone';
 
   let synth;
   let activeStrings = new Set();
+  
+  // Standard guitar tuning
   let strings = [
     { note: 'E2', key: 'A', color: 'amber-600' },
     { note: 'A2', key: 'S', color: 'amber-500' },
@@ -13,48 +15,76 @@
     { note: 'E4', key: 'H', color: 'amber-100' },
   ];
 
+  let audioContextStarted = false;
+
   onMount(() => {
-    synth = new Tone.Synth({
+    // FMSynth can do a remarkably good plucked string sound without needing external samples
+    synth = new Tone.PolySynth(Tone.FMSynth, {
+      harmonicity: 3.0,
+      modulationIndex: 10,
       oscillator: {
-        type: 'sawtooth8',
+        type: "sine"
       },
       envelope: {
-        attack: 0.005,
-        decay: 0.1,
-        sustain: 0.3,
-        release: 1,
+        attack: 0.01,
+        decay: 2,
+        sustain: 0.1,
+        release: 1
       },
-    }).toDestination();
-
-    const handleKeyDown = (event) => {
-      if (event.repeat) return;
-      const key = event.key.toUpperCase();
-      const stringData = strings.find((s) => s.key === key);
-      if (stringData) {
-        playString(stringData.note, stringData.key);
+      modulation: {
+        type: "sawtooth"
+      },
+      modulationEnvelope: {
+        attack: 0.01,
+        decay: 0.5,
+        sustain: 0,
+        release: 0.1
       }
-    };
-
-    const handleKeyUp = (event) => {
-      const key = event.key.toUpperCase();
-      activeStrings.delete(key);
-    };
+    }).toDestination(); // Connect directly to destination for a clean sound
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
+  });
+  
+  onDestroy(() => {
+     if (typeof window !== 'undefined') {
+       window.removeEventListener('keydown', handleKeyDown);
+       window.removeEventListener('keyup', handleKeyUp);
+     }
+     if (synth) synth.dispose();
   });
 
+  async function ensureAudioContext() {
+    if (!audioContextStarted) {
+      await Tone.start();
+      audioContextStarted = true;
+    }
+  }
+
   function playString(note, key) {
-    synth.triggerAttackRelease(note, '2n');
+    ensureAudioContext();
+    synth.triggerAttackRelease(note, '2n'); 
     activeStrings.add(key);
+    activeStrings = new Set(activeStrings); // trigger reactivity
     setTimeout(() => {
       activeStrings.delete(key);
+      activeStrings = new Set(activeStrings);
     }, 200);
+  }
+
+  function handleKeyDown(event) {
+    if (event.repeat) return;
+    const key = event.key.toUpperCase();
+    const stringData = strings.find((s) => s.key === key);
+    if (stringData) {
+      playString(stringData.note, stringData.key);
+    }
+  }
+
+  function handleKeyUp(event) {
+    const key = event.key.toUpperCase();
+    activeStrings.delete(key);
+    activeStrings = new Set(activeStrings);
   }
 </script>
 
